@@ -4,7 +4,7 @@
 
 import Chart from 'chart.js/auto';
 import { refLabelPlugin, refDS } from './plugins.js';
-import { barColor, getColors } from './factory.js';
+import { barColor, getColors, targetTooltip } from './factory.js';
 
 /**
  * Render Overview tab HTML
@@ -108,7 +108,10 @@ export function createOverviewCharts(data, config) {
     },
     options: {
       responsive: true,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: targetTooltip(0, ' kcal', 'Cumulative Balance')
+      },
       scales: {
         x: {
           grid: { display: false },
@@ -163,7 +166,8 @@ export function createOverviewCharts(data, config) {
             font: { size: 8 },
             filter: i => i.text !== 'Eaten' && !i.text.includes('kcal')
           }
-        }
+        },
+        tooltip: targetTooltip(config.targets.calories, ' kcal', 'Calories')
       },
       scales: {
         x: {
@@ -201,7 +205,10 @@ export function createOverviewCharts(data, config) {
     plugins: [refLabelPlugin],
     options: {
       responsive: true,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: targetTooltip(config.targets.sodium, 'mg', 'Sodium')
+      },
       scales: {
         x: {
           grid: { display: false },
@@ -241,7 +248,10 @@ export function createOverviewCharts(data, config) {
       plugins: [refLabelPlugin],
       options: {
         responsive: true,
-        plugins: { legend: { display: false } },
+        plugins: {
+          legend: { display: false },
+          tooltip: targetTooltip(mc.t, mc.u, mc.l)
+        },
         scales: {
           x: {
             grid: { display: false },

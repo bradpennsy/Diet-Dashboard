@@ -204,3 +204,26 @@ export function barColor(val, target, hg) {
     return blend(pct * 2); // ramps to full bad at 50% over target
   }
 }
+
+/**
+ * Create tooltip config with target comparison
+ * Shows value, % of target, and delta
+ */
+export function targetTooltip(target, unit, metricName) {
+  return {
+    callbacks: {
+      label(ctx) {
+        const val = ctx.parsed.y;
+        if (ctx.dataset._refLabel) return null; // Hide tooltip for reference lines
+        const pct = Math.round((val / target) * 100);
+        const delta = Math.round(val - target);
+        const sign = delta >= 0 ? '+' : '';
+        return [
+          metricName + ': ' + val.toLocaleString() + unit,
+          pct + '% of ' + target.toLocaleString() + unit + ' target',
+          sign + delta + unit + ' ' + (delta >= 0 ? 'over' : 'under')
+        ];
+      }
+    }
+  };
+}

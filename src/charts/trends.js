@@ -4,7 +4,7 @@
 
 import Chart from 'chart.js/auto';
 import { refLabelPlugin, refDS } from './plugins.js';
-import { getColors } from './factory.js';
+import { getColors, targetTooltip } from './factory.js';
 
 /**
  * Render Trends tab HTML
@@ -43,7 +43,7 @@ export function createTrendsCharts(data, config) {
   const HIGHER_GOOD = new Set(['protein', 'fiber']);
 
   // Helper function to create trend chart
-  function trendChart(id, k, co, ry, hg) {
+  function trendChart(id, k, co, ry, hg, metricName) {
     const u = k === 'cal' ? ' kcal' : k === 'sodium' ? 'mg' : 'g';
     const tlb = days.map(d => d.date);
 
@@ -74,7 +74,10 @@ export function createTrendsCharts(data, config) {
       plugins: [refLabelPlugin],
       options: {
         responsive: true,
-        plugins: { legend: { display: false } },
+        plugins: {
+          legend: { display: false },
+          tooltip: ry ? targetTooltip(ry, u, metricName) : {}
+        },
         scales: {
           x: {
             grid: { display: false },
@@ -91,14 +94,14 @@ export function createTrendsCharts(data, config) {
   }
 
   // Calorie trend
-  trendChart('calT', 'cal', colors.cCal, config.targets.calories, false);
+  trendChart('calT', 'cal', colors.cCal, config.targets.calories, false, 'Calories');
 
   // Sodium trend
-  trendChart('sodT', 'sodium', colors.cSodium, config.targets.sodium, false);
+  trendChart('sodT', 'sodium', colors.cSodium, config.targets.sodium, false, 'Sodium');
 
   // Macro trends
   macros.forEach(mc => {
-    trendChart('tr_' + mc.k, mc.k, mc.c, mc.t, HIGHER_GOOD.has(mc.k));
+    trendChart('tr_' + mc.k, mc.k, mc.c, mc.t, HIGHER_GOOD.has(mc.k), mc.l);
   });
 
   return charts;
