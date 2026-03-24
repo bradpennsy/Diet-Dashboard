@@ -4,7 +4,7 @@ import './styles/grid.css';
 import { loadConfig, saveConfig, isFirstRun, DEFAULTS } from './state.js';
 import { fetchDashboardData } from './api.js';
 import { renderSetup } from './settings/setup.js';
-import { renderSettingsGearButton, renderSettingsModal } from './settings/modal.js';
+import { renderSettingsGearButton, renderSettingsModal, setModalConfig } from './settings/modal.js';
 import { renderToday } from './ui/today.js';
 import { renderScorecard } from './ui/scorecard.js';
 import { renderOverviewHTML, createOverviewCharts } from './charts/overview.js';
@@ -270,10 +270,9 @@ function render(raw, config) {
   initTabs();
 
   // Inject settings modal
-  app.appendChild(renderSettingsModal(config, (newConfig) => {
-    saveConfig(newConfig);
-    location.reload();
-  }));
+  const modalElement = renderSettingsModal();
+  app.appendChild(modalElement);
+  setModalConfig(config);
 
   // Set default active tab
   if (!window._activeTab) {
