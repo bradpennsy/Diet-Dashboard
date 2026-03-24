@@ -185,7 +185,7 @@ function render(raw, config) {
   // Header
   h += '<div class="hdr"><div><h1 style="font-size:20px;font-weight:700">Diet Progress Dashboard</h1>';
   h += '<p style="color:var(--sub);margin-top:3px;font-size:12px">' + days.length + ' completed days' + (hasIP ? ' + 1 in progress' : '') + ' &middot; ' + allDays[0].date + ' – ' + allDays[allDays.length - 1].date + ' <span style="margin-left:6px;font-size:10px;color:' + colors.green + '">&middot; ✓ live</span></p></div>';
-  h += '<div class="hdr-right">' + renderSettingsGearButton() + '</div></div>';
+  h += '<div class="hdr-right" id="hdr-right"></div></div>';
 
   // Summary cards
   h += '<div class="cs">';
@@ -260,6 +260,12 @@ function render(raw, config) {
   h += renderScorecard(scorecardData, config);
 
   app.innerHTML = h;
+
+  // Add settings gear button with event listener
+  const hdrRight = document.getElementById('hdr-right');
+  if (hdrRight) {
+    hdrRight.appendChild(renderSettingsGearButton());
+  }
 
   // Create charts
   window._charts = [];
