@@ -9,6 +9,7 @@ import { renderScorecard } from './ui/scorecard.js';
 import { renderOverviewHTML, createOverviewCharts } from './charts/overview.js';
 import { renderTrendsHTML, createTrendsCharts } from './charts/trends.js';
 import { initTabs } from './ui/tabs.js';
+import { renderDateRangeBar, filterByRange } from './ui/daterange.js';
 import { getColors, fm, dn, todayStr, localHour, fmtTime, cumulativeAtHour } from './charts/factory.js';
 
 const HIGHER_GOOD = new Set(['protein', 'fiber']);
@@ -56,6 +57,9 @@ function render(raw, config) {
   loader.style.display = 'none';
   app.style.display = 'block';
 
+  // Initialize date range from config or default to '14d'
+  const selectedRange = config.dateRange || '14d';
+
   const colors = getColors();
   const today = raw.today_date || todayStr();
   const recentMeals = raw.recent_meals || raw.today_meals || [];
@@ -77,7 +81,10 @@ function render(raw, config) {
     inProgress: r.log_date === today
   }));
 
-  const days = allDays.filter(d => !d.inProgress);
+  // Filter days by selected range (but keep today if in progress)
+  const allDaysExcludingToday = allDays.filter(d => !d.inProgress);
+  const filteredDays = filterByRange(allDaysExcludingToday, selectedRange);
+  const days = filteredDays;
   const hasIP = allDays.some(d => d.inProgress);
   const todayData = allDays.find(d => d.inProgress);
 
@@ -189,6 +196,14 @@ function render(raw, config) {
     h += '<div class="c"><p class="l m">' + c.i + ' ' + c.l + '</p><p class="v m" style="color:' + c.c + '">' + c.v + '</p><p class="s">' + c.s + '</p></div>';
   });
   h += '</div>';
+
+  // Date range filter
+  window._dateRangeChange = (newRange) => {
+    config.dateRange = newRange;
+    saveConfig(config);
+    render(raw, config);
+  };
+  h += renderDateRangeBar(selectedRange);
 
   // Tab buttons
   h += '<div class="ts">';
