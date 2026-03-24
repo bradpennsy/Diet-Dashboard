@@ -62,3 +62,5 @@ footer{margin-top:14px;font-size:10px;color:var(--sub);text-align:center}
 .dr-pill{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--sub);cursor:pointer;font-weight:600;font-size:12px;font-family:inherit;transition:all .15s}
 .dr-pill:hover{border-color:var(--accent);color:var(--accent)}
 .dr-pill.active{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent);color:var(--accent)}
+.drill-down{margin-top:8px;padding:12px;background:var(--cream);border:1px solid var(--border);border-radius:8px;animation:slideDown .2s ease}
+@keyframes slideDown{from{opacity:0;max-height:0}to{opacity:1;max-height:500px}}

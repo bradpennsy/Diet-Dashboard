@@ -94,6 +94,7 @@ function render(raw, config) {
     if (!mealsByDate[m.log_date]) mealsByDate[m.log_date] = [];
     mealsByDate[m.log_date].push(m);
   });
+  window._mealsByDate = mealsByDate; // Make available to drill-down handlers
   const todayMeals = mealsByDate[today] || [];
 
   // Calculate pace metrics
