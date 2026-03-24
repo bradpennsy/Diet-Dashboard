@@ -4,7 +4,7 @@
 
 import Chart from 'chart.js/auto';
 import { refLabelPlugin, refDS } from './plugins.js';
-import { barColor, getColors, targetTooltip } from './factory.js';
+import { barColor, getColors, targetTooltip, zoomConfig } from './factory.js';
 
 /**
  * Render Overview tab HTML
@@ -118,7 +118,8 @@ export function createOverviewCharts(data, config) {
       },
       plugins: {
         legend: { display: false },
-        tooltip: targetTooltip(0, ' kcal', 'Cumulative Balance')
+        tooltip: targetTooltip(0, ' kcal', 'Cumulative Balance'),
+        zoom: zoomConfig()
       },
       scales: {
         x: {
@@ -132,6 +133,24 @@ export function createOverviewCharts(data, config) {
       }
     }
   }));
+
+  // Add reset zoom button for cumulative chart
+  const cumChart = charts[charts.length - 1];
+  const cumResetBtn = document.createElement('button');
+  cumResetBtn.className = 'reset-zoom rf m';
+  cumResetBtn.textContent = 'Reset Zoom';
+  cumResetBtn.style.display = 'none';
+  cumResetBtn.onclick = () => {
+    cumChart.resetZoom();
+    cumResetBtn.style.display = 'none';
+  };
+  document.getElementById('cumC').parentElement.appendChild(cumResetBtn);
+
+  // Set up zoom handler for cumulative chart
+  const cumZoomPlugin = cumChart.options.plugins.zoom;
+  cumZoomPlugin.zoom.onZoom = ({ chart }) => {
+    cumResetBtn.style.display = 'block';
+  };
 
   // Calories vs burn
   const calLabels = allDays.map(d => d.date);
@@ -183,7 +202,8 @@ export function createOverviewCharts(data, config) {
             filter: i => i.text !== 'Eaten' && !i.text.includes('kcal')
           }
         },
-        tooltip: targetTooltip(config.targets.calories, ' kcal', 'Calories')
+        tooltip: targetTooltip(config.targets.calories, ' kcal', 'Calories'),
+        zoom: zoomConfig()
       },
       scales: {
         x: {
@@ -199,6 +219,24 @@ export function createOverviewCharts(data, config) {
       }
     }
   }));
+
+  // Add reset zoom button for calories chart
+  const calChart = charts[charts.length - 1];
+  const calResetBtn = document.createElement('button');
+  calResetBtn.className = 'reset-zoom rf m';
+  calResetBtn.textContent = 'Reset Zoom';
+  calResetBtn.style.display = 'none';
+  calResetBtn.onclick = () => {
+    calChart.resetZoom();
+    calResetBtn.style.display = 'none';
+  };
+  document.getElementById('calC').parentElement.appendChild(calResetBtn);
+
+  // Set up zoom handler for calories chart
+  const calZoomPlugin = calChart.options.plugins.zoom;
+  calZoomPlugin.zoom.onZoom = ({ chart }) => {
+    calResetBtn.style.display = 'block';
+  };
 
   // Sodium
   const sodLabels = allDays.map(d => d.date);
@@ -231,7 +269,8 @@ export function createOverviewCharts(data, config) {
       },
       plugins: {
         legend: { display: false },
-        tooltip: targetTooltip(config.targets.sodium, 'mg', 'Sodium')
+        tooltip: targetTooltip(config.targets.sodium, 'mg', 'Sodium'),
+        zoom: zoomConfig()
       },
       scales: {
         x: {
@@ -247,6 +286,24 @@ export function createOverviewCharts(data, config) {
       }
     }
   }));
+
+  // Add reset zoom button for sodium chart
+  const sodChart = charts[charts.length - 1];
+  const sodResetBtn = document.createElement('button');
+  sodResetBtn.className = 'reset-zoom rf m';
+  sodResetBtn.textContent = 'Reset Zoom';
+  sodResetBtn.style.display = 'none';
+  sodResetBtn.onclick = () => {
+    sodChart.resetZoom();
+    sodResetBtn.style.display = 'none';
+  };
+  document.getElementById('sodC').parentElement.appendChild(sodResetBtn);
+
+  // Set up zoom handler for sodium chart
+  const sodZoomPlugin = sodChart.options.plugins.zoom;
+  sodZoomPlugin.zoom.onZoom = ({ chart }) => {
+    sodResetBtn.style.display = 'block';
+  };
 
   // Macro bars
   const HIGHER_GOOD = new Set(['protein', 'fiber']);
@@ -282,7 +339,8 @@ export function createOverviewCharts(data, config) {
         },
         plugins: {
           legend: { display: false },
-          tooltip: targetTooltip(mc.t, mc.u, mc.l)
+          tooltip: targetTooltip(mc.t, mc.u, mc.l),
+          zoom: zoomConfig()
         },
         scales: {
           x: {
@@ -298,6 +356,25 @@ export function createOverviewCharts(data, config) {
         }
       }
     }));
+
+    // Add reset zoom button for macro chart
+    const macroChart = charts[charts.length - 1];
+    const macroResetBtn = document.createElement('button');
+    macroResetBtn.className = 'reset-zoom rf m';
+    macroResetBtn.textContent = 'Reset Zoom';
+    macroResetBtn.style.display = 'none';
+    macroResetBtn.onclick = () => {
+      macroChart.resetZoom();
+      macroResetBtn.style.display = 'none';
+    };
+    const canvasEl = document.getElementById('ov_' + mc.k);
+    canvasEl.parentElement.appendChild(macroResetBtn);
+
+    // Set up zoom handler for macro chart
+    const macroZoomPlugin = macroChart.options.plugins.zoom;
+    macroZoomPlugin.zoom.onZoom = ({ chart }) => {
+      macroResetBtn.style.display = 'block';
+    };
   });
 
   return charts;

@@ -4,7 +4,7 @@
 
 import Chart from 'chart.js/auto';
 import { refLabelPlugin, refDS } from './plugins.js';
-import { getColors, targetTooltip } from './factory.js';
+import { getColors, targetTooltip, zoomConfig } from './factory.js';
 
 /**
  * Render Trends tab HTML
@@ -84,7 +84,8 @@ export function createTrendsCharts(data, config) {
         },
         plugins: {
           legend: { display: false },
-          tooltip: ry ? targetTooltip(ry, u, metricName) : {}
+          tooltip: ry ? targetTooltip(ry, u, metricName) : {},
+          zoom: zoomConfig()
         },
         scales: {
           x: {
@@ -99,6 +100,25 @@ export function createTrendsCharts(data, config) {
         }
       }
     }));
+
+    // Add reset zoom button for trend chart
+    const trendChart = charts[charts.length - 1];
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'reset-zoom rf m';
+    resetBtn.textContent = 'Reset Zoom';
+    resetBtn.style.display = 'none';
+    resetBtn.onclick = () => {
+      trendChart.resetZoom();
+      resetBtn.style.display = 'none';
+    };
+    const canvasEl = document.getElementById(id);
+    canvasEl.parentElement.appendChild(resetBtn);
+
+    // Set up zoom handler for trend chart
+    const zoomPluginInstance = trendChart.options.plugins.zoom;
+    zoomPluginInstance.zoom.onZoom = ({ chart }) => {
+      resetBtn.style.display = 'block';
+    };
   }
 
   // Calorie trend

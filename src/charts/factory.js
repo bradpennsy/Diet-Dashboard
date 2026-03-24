@@ -2,6 +2,11 @@
  * Chart factory utilities and color/formatting helpers
  */
 
+import zoomPlugin from 'chartjs-plugin-zoom';
+import { Chart } from 'chart.js';
+
+Chart.register(zoomPlugin);
+
 // ─── CSS Variable Helpers ───
 
 /**
@@ -203,6 +208,23 @@ export function barColor(val, target, hg) {
     const pct = (val - target) / target; // 0=at target, 1=double target
     return blend(pct * 2); // ramps to full bad at 50% over target
   }
+}
+
+/**
+ * Create zoom and pan config for charts
+ */
+export function zoomConfig() {
+  return {
+    zoom: {
+      wheel: { enabled: true },
+      pinch: { enabled: true },
+      mode: 'x'
+    },
+    pan: {
+      enabled: true,
+      mode: 'x'
+    }
+  };
 }
 
 /**
