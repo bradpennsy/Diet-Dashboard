@@ -16,12 +16,27 @@ export function renderTrendsHTML(data, config) {
   const { days, macros } = data;
 
   let h = '';
-  h += '<div class="vw a" id="vw-trends">';
-  h += '<div class="row2"><div class="sec"><h3>Calorie Trend</h3><canvas id="calT" height="140"></canvas></div><div class="sec"><h3>Sodium Trend</h3><canvas id="sodT" height="140"></canvas></div></div>';
-  h += '<div class="row3">';
-  macros.forEach(mc => {
-    h += '<div class="sec"><h3>' + mc.l + '</h3><canvas id="tr_' + mc.k + '" height="120"></canvas></div>';
+  h += '<div class="vw a" id="vw-trends"><div class="grid-stack">';
+
+  // Calorie trend (x:0, y:0, w:6, h:3)
+  h += '<div class="grid-stack-item" gs-x="0" gs-y="0" gs-w="6" gs-h="3" gs-min-w="4" gs-min-h="2"><div class="grid-stack-item-content"><span class="gs-drag-handle">⋮</span><h3>Calorie Trend</h3><canvas id="calT" height="160"></canvas></div></div>';
+
+  // Sodium trend (x:6, y:0, w:6, h:3)
+  h += '<div class="grid-stack-item" gs-x="6" gs-y="0" gs-w="6" gs-h="3" gs-min-w="4" gs-min-h="2"><div class="grid-stack-item-content"><span class="gs-drag-handle">⋮</span><h3>Sodium Trend</h3><canvas id="sodT" height="160"></canvas></div></div>';
+
+  // Macro trends
+  const positions = [
+    { x: 0, y: 3 },
+    { x: 4, y: 3 },
+    { x: 8, y: 3 },
+    { x: 0, y: 6 },
+    { x: 4, y: 6 }
+  ];
+  macros.forEach((mc, idx) => {
+    const pos = positions[idx];
+    h += '<div class="grid-stack-item" gs-x="' + pos.x + '" gs-y="' + pos.y + '" gs-w="4" gs-h="3" gs-min-w="3" gs-min-h="2"><div class="grid-stack-item-content"><span class="gs-drag-handle">⋮</span><h3>' + mc.l + '</h3><canvas id="tr_' + mc.k + '" height="160"></canvas></div></div>';
   });
+
   h += '</div></div>';
 
   return h;

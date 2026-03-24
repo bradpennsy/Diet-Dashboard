@@ -35,6 +35,10 @@ export function initGrid(containerEl, tab, savedLayout) {
 
   const isMobile = window.innerWidth < 768;
 
+  // Find the .grid-stack div inside the container
+  const gridStackEl = containerEl.querySelector('.grid-stack');
+  if (!gridStackEl) return null;
+
   const grid = GridStack.init({
     column: 12,
     cellHeight: 80,
@@ -44,7 +48,7 @@ export function initGrid(containerEl, tab, savedLayout) {
     handle: '.gs-drag-handle',
     animate: true,
     float: false
-  }, containerEl);
+  }, gridStackEl);
 
   return grid;
 }

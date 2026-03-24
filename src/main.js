@@ -1,5 +1,6 @@
 import './styles/main.css';
 import './styles/settings.css';
+import './styles/grid.css';
 import { loadConfig, saveConfig, isFirstRun, DEFAULTS } from './state.js';
 import { fetchDashboardData } from './api.js';
 import { renderSetup } from './settings/setup.js';
@@ -10,6 +11,7 @@ import { renderOverviewHTML, createOverviewCharts } from './charts/overview.js';
 import { renderTrendsHTML, createTrendsCharts } from './charts/trends.js';
 import { initTabs } from './ui/tabs.js';
 import { renderDateRangeBar, filterByRange } from './ui/daterange.js';
+import { initGrid, getGridLayout, onLayoutChange } from './ui/grid.js';
 import { getColors, fm, dn, todayStr, localHour, fmtTime, cumulativeAtHour } from './charts/factory.js';
 
 const HIGHER_GOOD = new Set(['protein', 'fiber']);
@@ -279,6 +281,60 @@ function render(raw, config) {
     document.querySelector('[data-v="today"]').classList.add('a');
     document.getElementById('vw-today').classList.add('a');
   }
+
+  // Initialize grid for overview and trends tabs
+  const initializeGrid = (tabName) => {
+    // Destroy old grid
+    if (window._grid) {
+      window._grid.destroy(false);
+      window._grid = null;
+    }
+
+    if (window._gridResizeObserver) {
+      window._gridResizeObserver.disconnect();
+      window._gridResizeObserver = null;
+    }
+
+    // Only initialize grid for overview and trends
+    if (tabName === 'overview' || tabName === 'trends') {
+      const viewEl = document.getElementById('vw-' + tabName);
+      if (viewEl) {
+        const savedLayout = config.gridLayout?.[tabName];
+        window._grid = initGrid(viewEl, tabName, savedLayout);
+
+        if (window._grid) {
+          // Save layout changes
+          onLayoutChange(window._grid, (layout) => {
+            if (!config.gridLayout) config.gridLayout = {};
+            config.gridLayout[tabName] = layout;
+            saveConfig(config);
+          });
+
+          // Add ResizeObserver to redraw charts on grid resize
+          window._gridResizeObserver = new ResizeObserver(() => {
+            window._charts.forEach(c => c.resize());
+          });
+          viewEl.querySelectorAll('canvas').forEach(canvas => {
+            window._gridResizeObserver.observe(canvas.parentElement);
+          });
+        }
+      }
+    }
+  };
+
+  // Initialize grid for current tab
+  initializeGrid(window._activeTab);
+
+  // Re-initialize grid on tab change
+  document.querySelectorAll('[data-v]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const newTab = btn.getAttribute('data-v');
+      if (newTab !== window._activeTab) {
+        window._activeTab = newTab;
+        initializeGrid(newTab);
+      }
+    });
+  });
 }
 
 main();

@@ -18,8 +18,9 @@ export function renderOverviewHTML(data, config) {
 
   let h = '';
   h += '<div class="vw a" id="vw-overview">';
-  h += '<div class="sec"><h3>Cumulative Balance <span style="font-size:9px;font-weight:400;text-transform:none;color:var(--sub)">(' + days.length + ' days)</span></h3><div style="padding:0 4px 6px">';
+  h += '<div class="grid-stack">';
 
+  // Cumulative Balance Chart - 12w x 3h
   const calorieBudget = config.trackActiveBurn ? config.targets.calories : config.targets.calories;
   const cumT = days.reduce((a, d) => {
     const dayBudget = config.trackActiveBurn ? calorieBudget + (d.ac || 0) : calorieBudget;
@@ -29,7 +30,6 @@ export function renderOverviewHTML(data, config) {
   const isDef = cr >= 0;
   const lbs = (Math.abs(cr) / 3500).toFixed(2);
 
-  // Calculate gauge position
   let run = 0;
   const cumD = days.map(d => {
     const dayBudget = config.trackActiveBurn ? (config.targets.calories + (d.ac || 0)) : config.targets.calories;
@@ -41,6 +41,11 @@ export function renderOverviewHTML(data, config) {
   const gMx = Math.max(mxA, Math.abs(cr)) * 1.2;
   const gP = Math.max(5, Math.min(95, 50 + (cr / gMx) * 50));
 
+  h += '<div class="grid-stack-item" gs-x="0" gs-y="0" gs-w="12" gs-h="3" gs-min-w="4" gs-min-h="2">';
+  h += '<div class="grid-stack-item-content">';
+  h += '<span class="gs-drag-handle">⋮</span>';
+  h += '<h3>Cumulative Balance <span style="font-size:9px;font-weight:400;text-transform:none;color:var(--sub)">(' + days.length + ' days)</span></h3>';
+  h += '<div style="padding:0 4px 6px">';
   h += '<div style="text-align:center;margin-bottom:12px"><p class="m" style="font-size:26px;font-weight:700;color:' + (isDef ? colors.green : colors.red) + '">' + (isDef ? '−' : '+') + Math.abs(cr).toLocaleString() + ' kcal</p>';
   h += '<p style="margin-top:3px;font-size:12px;color:var(--sub)">' + (isDef ? 'deficit' : 'surplus') + ' &middot; ≈ ' + lbs + ' lb</p></div>';
   h += '<div class="gb"><div class="gc"></div>';
@@ -51,16 +56,38 @@ export function renderOverviewHTML(data, config) {
   }
   h += '<div class="gd" style="left:' + gP + '%;background:' + (isDef ? colors.green : colors.red) + '"></div></div>';
   h += '<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--sub);padding:0 4px" class="m"><span>← surplus</span><span>0</span><span>deficit →</span></div>';
-  h += '<div style="margin-top:12px"><canvas id="cumC" height="100"></canvas></div></div></div>';
+  h += '<div style="margin-top:12px"><canvas id="cumC" height="100"></canvas></div>';
+  h += '</div></div></div>';
 
-  h += '<div class="row2"><div class="sec"><h3>Calories vs Burn Target</h3><canvas id="calC" height="160"></canvas>';
-  h += '<div class="lg"><div><div style="width:10px;height:10px;border-radius:2px;background:' + colors.green + '"></div>On target</div><div><div style="width:20px;height:10px;border-radius:2px;background:linear-gradient(90deg,' + colors.sub + ',' + colors.red + ')"></div>Over target</div><div><div style="width:14px;height:2px;background:' + colors.cBurn + '"></div>Burn</div></div></div>';
-  h += '<div class="sec"><h3>Sodium vs ' + config.targets.sodium + 'mg</h3><canvas id="sodC" height="160"></canvas></div></div>';
+  // Calories Chart - 6w x 3h
+  h += '<div class="grid-stack-item" gs-x="0" gs-y="3" gs-w="6" gs-h="3" gs-min-w="4" gs-min-h="2">';
+  h += '<div class="grid-stack-item-content">';
+  h += '<span class="gs-drag-handle">⋮</span>';
+  h += '<h3>Calories vs Burn Target</h3>';
+  h += '<canvas id="calC" height="160"></canvas>';
+  h += '<div class="lg"><div><div style="width:10px;height:10px;border-radius:2px;background:' + colors.green + '"></div>On target</div><div><div style="width:20px;height:10px;border-radius:2px;background:linear-gradient(90deg,' + colors.sub + ',' + colors.red + ')"></div>Over target</div><div><div style="width:14px;height:2px;background:' + colors.cBurn + '"></div>Burn</div></div>';
+  h += '</div></div></div>';
 
-  h += '<div class="row3">';
-  macros.forEach(mc => {
-    h += '<div class="sec"><h3>' + mc.l + ' (' + mc.u + ')</h3><canvas id="ov_' + mc.k + '" height="130"></canvas></div>';
+  // Sodium Chart - 6w x 3h
+  h += '<div class="grid-stack-item" gs-x="6" gs-y="3" gs-w="6" gs-h="3" gs-min-w="4" gs-min-h="2">';
+  h += '<div class="grid-stack-item-content">';
+  h += '<span class="gs-drag-handle">⋮</span>';
+  h += '<h3>Sodium vs ' + config.targets.sodium + 'mg</h3>';
+  h += '<canvas id="sodC" height="160"></canvas>';
+  h += '</div></div></div>';
+
+  // Macro Charts - 4w x 3h each
+  macros.forEach((mc, idx) => {
+    const x = (idx % 3) * 4;
+    const y = 6 + Math.floor(idx / 3) * 3;
+    h += '<div class="grid-stack-item" gs-x="' + x + '" gs-y="' + y + '" gs-w="4" gs-h="3" gs-min-w="4" gs-min-h="2">';
+    h += '<div class="grid-stack-item-content">';
+    h += '<span class="gs-drag-handle">⋮</span>';
+    h += '<h3>' + mc.l + ' (' + mc.u + ')</h3>';
+    h += '<canvas id="ov_' + mc.k + '" height="130"></canvas>';
+    h += '</div></div></div>';
   });
+
   h += '</div></div>';
 
   return h;
