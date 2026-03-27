@@ -20,7 +20,10 @@ const DEFAULTS = {
 
 export function loadConfig() {
   const raw = localStorage.getItem(CONFIG_KEY);
-  let config = raw ? JSON.parse(raw) : null;
+  let config = null;
+  if (raw) {
+    try { config = JSON.parse(raw); } catch { localStorage.removeItem(CONFIG_KEY); }
+  }
 
   // Migrate old palette key
   if (!config) {
@@ -34,7 +37,7 @@ export function loadConfig() {
     return null; // No config = first run
   }
 
-  return { ...DEFAULTS, ...config };
+  return { ...DEFAULTS, ...config, targets: { ...DEFAULTS.targets, ...(config.targets || {}) } };
 }
 
 export function saveConfig(config) {

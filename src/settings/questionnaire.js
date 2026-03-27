@@ -85,8 +85,19 @@ export function renderQuestionnaire(container, onComplete) {
     const cardDiv = document.createElement('div');
     cardDiv.className = 'setup-card questionnaire-step';
 
-    const content = step.render(state.answers);
-    cardDiv.innerHTML = content;
+    // Progress bar
+    const progressBar = document.createElement('div');
+    progressBar.className = 'setup-progress-bar';
+    steps.forEach((_, i) => {
+      const seg = document.createElement('div');
+      seg.className = 'setup-progress-segment' +
+        (i < state.currentStep ? ' completed' : '') +
+        (i === state.currentStep ? ' active' : '');
+      progressBar.appendChild(seg);
+    });
+    cardDiv.appendChild(progressBar);
+
+    cardDiv.insertAdjacentHTML('beforeend', step.render(state.answers));
 
     // Attach event listeners
     if (step.attachListeners) {
@@ -339,8 +350,10 @@ export function renderQuestionnaire(container, onComplete) {
   function createSummaryStep() {
     return {
       render: (answers) => {
-        const targets = calculateTargets(answers);
-        answers.targets = targets;
+        if (!answers.targets) {
+          answers.targets = calculateTargets(answers);
+        }
+        const targets = answers.targets;
 
         return `
           <h2>Your Macro Targets</h2>

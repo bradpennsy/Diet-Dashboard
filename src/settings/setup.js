@@ -1,6 +1,7 @@
 import { renderQuestionnaire } from './questionnaire.js';
 import { testConnection } from '../api.js';
 import { DEFAULTS } from '../state.js';
+import { esc } from '../charts/factory.js';
 
 export function renderSetup(container, onComplete) {
   const state = {
@@ -100,7 +101,7 @@ export function renderSetup(container, onComplete) {
           <button class="setup-button primary" style="width: 100%;">Test Connection</button>
           <div class="connection-status"></div>
           <p class="setup-description" style="font-size: 12px; margin-top: 16px; color: var(--text-secondary);">
-            Need to set up your Supabase backend? See docs/supabase-setup.md
+            Need to set up your Supabase backend? <a href="/docs/supabase-setup.md" target="_blank" style="color: var(--accent); text-decoration: underline; cursor: pointer;">See the setup guide</a>
           </p>
         </div>
       `,
@@ -232,7 +233,7 @@ export function renderSetup(container, onComplete) {
   function createDoneScreen() {
     return {
       render: (config) => {
-        const maskedUrl = config.apiUrl.substring(0, 30) + '...';
+        const maskedUrl = esc(config.apiUrl.substring(0, 30) + '...');
         return `
           <div class="setup-card">
             <h2>You're all set!</h2>

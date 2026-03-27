@@ -16,13 +16,13 @@ const DEFAULT_LAYOUTS = {
     { id: 'ov_sugar', x: 4, y: 9, w: 4, h: 3 }
   ],
   trends: [
-    { id: 'calT', x: 0, y: 0, w: 6, h: 3 },
-    { id: 'sodT', x: 6, y: 0, w: 6, h: 3 },
-    { id: 'tr_protein', x: 0, y: 3, w: 4, h: 3 },
-    { id: 'tr_carbs', x: 4, y: 3, w: 4, h: 3 },
-    { id: 'tr_fat', x: 8, y: 3, w: 4, h: 3 },
-    { id: 'tr_fiber', x: 0, y: 6, w: 4, h: 3 },
-    { id: 'tr_sugar', x: 4, y: 6, w: 4, h: 3 }
+    { id: 'calT', x: 0, y: 0, w: 12, h: 3 },
+    { id: 'sodT', x: 0, y: 3, w: 6, h: 3 },
+    { id: 'tr_protein', x: 6, y: 3, w: 6, h: 3 },
+    { id: 'tr_carbs', x: 0, y: 6, w: 6, h: 3 },
+    { id: 'tr_fat', x: 6, y: 6, w: 6, h: 3 },
+    { id: 'tr_fiber', x: 0, y: 9, w: 6, h: 3 },
+    { id: 'tr_sugar', x: 6, y: 9, w: 6, h: 3 }
   ]
 };
 
@@ -50,6 +50,10 @@ export function initGrid(containerEl, tab, savedLayout) {
     float: false
   }, gridStackEl);
 
+  if (savedLayout) {
+    grid.load(savedLayout, false);
+  }
+
   return grid;
 }
 
@@ -59,7 +63,7 @@ export function initGrid(containerEl, tab, savedLayout) {
 export function getGridLayout(grid) {
   if (!grid) return null;
   return grid.engine.nodes.map(n => ({
-    id: n.el?.querySelector('canvas')?.id || n.el?.id || n.id,
+    id: n.id,
     x: n.x,
     y: n.y,
     w: n.w,

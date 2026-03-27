@@ -19,7 +19,6 @@ export function renderDateRangeBar(selectedRange) {
       <button
         class="dr-pill ${isActive ? 'active' : ''}"
         data-range="${range}"
-        onclick="window._dateRangeChange && window._dateRangeChange('${range}')"
       >
         ${labels[range]}
       </button>
@@ -41,9 +40,10 @@ export function renderDateRangeBar(selectedRange) {
  */
 export function filterByRange(allDays, range) {
   if (range === 'all') return allDays;
-  const days = parseInt(range);
+  const numDays = parseInt(range, 10);
+  if (isNaN(numDays)) return allDays;
   const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - days);
+  cutoff.setDate(cutoff.getDate() - numDays);
   const cutoffStr = cutoff.toISOString().slice(0, 10);
   return allDays.filter(d => d.raw >= cutoffStr);
 }

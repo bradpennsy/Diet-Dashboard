@@ -87,8 +87,8 @@ export function renderSettingsModal() {
 
 export function openSettings() {
   if (!modalElement) {
-    const modal = renderSettingsModal();
-    document.body.appendChild(modal);
+    modalElement = renderSettingsModal();
+    document.body.appendChild(modalElement);
   }
 
   modalElement.style.display = 'flex';
@@ -193,6 +193,7 @@ function renderConnectionTab() {
 }
 
 function renderTargetsTab() {
+  if (!modalState?.config) return;
   const content = modalState.content;
   const footer = modalState.footer;
 
@@ -358,7 +359,8 @@ function renderLayoutTab() {
 
 export function setModalConfig(config) {
   if (!modalState) {
-    renderSettingsModal();
+    modalElement = renderSettingsModal();
+    document.body.appendChild(modalElement);
   }
   modalState.config = config;
 }

@@ -7,6 +7,27 @@ import { Chart } from 'chart.js';
 
 Chart.register(zoomPlugin);
 
+// ─── Shared Constants ───
+
+/**
+ * Nutrients where higher values are better (hit target = good)
+ */
+export const HIGHER_GOOD = new Set(['protein', 'fiber']);
+
+// ─── Security Helpers ───
+
+/**
+ * Escape a string for safe insertion into innerHTML
+ */
+export function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // ─── CSS Variable Helpers ───
 
 /**
@@ -134,7 +155,7 @@ export function gradientColor(score) {
   const yRGB = [
     Math.min(255, Math.round((gRGB[0] + rRGB[0]) / 2 * 1.1)),
     Math.round((gRGB[1] + rRGB[1]) / 2 * 0.95),
-    Math.round((gRGB[0] + rRGB[2]) / 2 * 0.4)
+    Math.round((gRGB[2] + rRGB[2]) / 2 * 0.4)
   ];
   let r, g, b;
   if (s <= 0) {

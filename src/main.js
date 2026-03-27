@@ -12,9 +12,8 @@ import { renderTrendsHTML, createTrendsCharts } from './charts/trends.js';
 import { initTabs } from './ui/tabs.js';
 import { renderDateRangeBar, filterByRange } from './ui/daterange.js';
 import { initGrid, getGridLayout, onLayoutChange } from './ui/grid.js';
-import { getColors, fm, dn, todayStr, localHour, fmtTime, cumulativeAtHour } from './charts/factory.js';
+import { getColors, fm, dn, todayStr, localHour, fmtTime, cumulativeAtHour, esc, HIGHER_GOOD } from './charts/factory.js';
 
-const HIGHER_GOOD = new Set(['protein', 'fiber']);
 const DN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -43,7 +42,7 @@ async function main() {
     render(raw, config);
   } catch (e) {
     const loader = document.getElementById('loader');
-    loader.innerHTML = '<div class="err-box"><p style="color:var(--red);font-weight:700;font-size:16px;margin-bottom:8px">Failed to load</p><p style="color:var(--sub);font-size:12px;margin-bottom:12px">' + e.message + '</p><button class="rf m" onclick="location.reload()">&#8635; Retry</button></div>';
+    loader.innerHTML = '<div class="err-box"><p style="color:var(--red);font-weight:700;font-size:16px;margin-bottom:8px">Failed to load</p><p style="color:var(--sub);font-size:12px;margin-bottom:12px">' + esc(e.message) + '</p><button class="rf m" onclick="location.reload()">&#8635; Retry</button></div>';
   }
 }
 
@@ -162,9 +161,11 @@ function render(raw, config) {
   const uSod = days.filter(d => d.sodium <= config.targets.sodium).length;
   const uCal = days.filter(d => d.cal <= config.targets.calories).length;
 
-  const calorieAvgDef = config.trackActiveBurn
-    ? days.reduce((s, d) => s + (config.targets.calories + (d.ac || 0) - d.cal), 0) / days.length
-    : days.reduce((s, d) => s + (config.targets.calories - d.cal), 0) / days.length;
+  const calorieAvgDef = days.length
+    ? (config.trackActiveBurn
+      ? days.reduce((s, d) => s + (config.targets.calories + (d.ac || 0) - d.cal), 0) / days.length
+      : days.reduce((s, d) => s + (config.targets.calories - d.cal), 0) / days.length)
+    : 0;
   const avgDef = Math.round(calorieAvgDef);
 
   const currentTimeStr = new Date().toLocaleTimeString('en-US', {
@@ -184,7 +185,10 @@ function render(raw, config) {
 
   // Header
   h += '<div class="hdr"><div><h1 style="font-size:20px;font-weight:700">Diet Progress Dashboard</h1>';
-  h += '<p style="color:var(--sub);margin-top:3px;font-size:12px">' + days.length + ' completed days' + (hasIP ? ' + 1 in progress' : '') + ' &middot; ' + allDays[0].date + ' – ' + allDays[allDays.length - 1].date + ' <span style="margin-left:6px;font-size:10px;color:' + colors.green + '">&middot; ✓ live</span></p></div>';
+  const dateRangeStr = allDays.length
+    ? ' &middot; ' + allDays[0].date + ' – ' + allDays[allDays.length - 1].date
+    : '';
+  h += '<p style="color:var(--sub);margin-top:3px;font-size:12px">' + days.length + ' completed days' + (hasIP ? ' + 1 in progress' : '') + dateRangeStr + ' <span style="margin-left:6px;font-size:10px;color:' + colors.green + '">&middot; ✓ live</span></p></div>';
   h += '<div class="hdr-right" id="hdr-right"></div></div>';
 
   // Summary cards
@@ -201,11 +205,6 @@ function render(raw, config) {
   h += '</div>';
 
   // Date range filter
-  window._dateRangeChange = (newRange) => {
-    config.dateRange = newRange;
-    saveConfig(config);
-    render(raw, config);
-  };
   h += renderDateRangeBar(selectedRange);
 
   // Tab buttons
@@ -260,6 +259,15 @@ function render(raw, config) {
   h += renderScorecard(scorecardData, config);
 
   app.innerHTML = h;
+
+  // Wire date range filter buttons
+  document.querySelectorAll('[data-range]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      config.dateRange = btn.dataset.range;
+      saveConfig(config);
+      render(raw, config);
+    });
+  });
 
   // Add settings gear button with event listener
   const hdrRight = document.getElementById('hdr-right');

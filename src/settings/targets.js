@@ -31,9 +31,10 @@ export function renderTargetEditor(container, targets, onChange) {
 
     input.addEventListener('change', () => {
       const newVal = parseInt(input.value, 10);
-      if (!isNaN(newVal)) {
-        targets[field.key] = newVal;
-        onChange(targets);
+      if (!isNaN(newVal) && newVal >= field.min && newVal <= field.max) {
+        const draft = { ...targets };
+        draft[field.key] = newVal;
+        onChange(draft);
       }
     });
 

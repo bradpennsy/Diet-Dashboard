@@ -2,7 +2,7 @@
  * Today view renderer
  */
 
-import { fm, fmtTime, localHour, gradientColor, paceScore } from '../charts/factory.js';
+import { fm, fmtTime, localHour, gradientColor, paceScore, esc, HIGHER_GOOD } from '../charts/factory.js';
 
 /**
  * Render the Today view
@@ -25,7 +25,6 @@ export function renderToday(data, config) {
     colors
   } = data;
 
-  const HIGHER_GOOD = new Set(['protein', 'fiber']);
   const C = colors;
 
   let h = '';
@@ -138,8 +137,8 @@ export function renderToday(data, config) {
         if (ts) h += '<div class="time m">' + ts + '</div>';
 
         g.items.forEach(m => {
-          h += '<div style="margin:4px 0 1px;font-size:11px;font-weight:600">' + (m.meal_name || 'Untitled') + ' <span class="m" style="font-size:9px;font-weight:400;color:var(--sub)">' + (+(m.calories_kcal || 0)) + ' kcal</span></div>';
-          if (m.description) h += '<div class="desc">' + m.description + '</div>';
+          h += '<div style="margin:4px 0 1px;font-size:11px;font-weight:600">' + esc(m.meal_name || 'Untitled') + ' <span class="m" style="font-size:9px;font-weight:400;color:var(--sub)">' + (+(m.calories_kcal || 0)) + ' kcal</span></div>';
+          if (m.description) h += '<div class="desc">' + esc(m.description) + '</div>';
         });
 
         h += '<div class="meal-macros" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">';

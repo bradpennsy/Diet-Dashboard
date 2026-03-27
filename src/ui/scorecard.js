@@ -2,6 +2,8 @@
  * Scorecard view renderer
  */
 
+import { HIGHER_GOOD } from '../charts/factory.js';
+
 /**
  * Render the Scorecard view
  * @param {Object} data - Processed data object
@@ -21,12 +23,11 @@ export function renderScorecard(data, config) {
   });
   h += '</tr></thead><tbody>';
 
-  const HIGHER_GOOD = new Set(['protein', 'fiber']);
 
   allMets.forEach((mt, i) => {
     const hg = HIGHER_GOOD.has(mt.k);
     const vs = days.map(d => d[mt.k]);
-    const a = Math.round(vs.reduce((s, v) => s + v, 0) / vs.length * 10) / 10;
+    const a = vs.length ? Math.round(vs.reduce((s, v) => s + v, 0) / vs.length * 10) / 10 : 0;
     const oc = hg ? vs.filter(v => v < mt.t).length : vs.filter(v => v > mt.t).length;
     const tr = vs.length >= 2 ? vs[vs.length - 1] - vs[0] : 0;
 

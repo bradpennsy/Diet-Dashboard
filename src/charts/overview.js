@@ -4,7 +4,8 @@
 
 import Chart from 'chart.js/auto';
 import { refLabelPlugin, refDS } from './plugins.js';
-import { barColor, getColors, targetTooltip, zoomConfig } from './factory.js';
+import { barColor, getColors, targetTooltip, zoomConfig, HIGHER_GOOD } from './factory.js';
+import { toggleDrillDown } from './drilldown.js';
 
 /**
  * Render Overview tab HTML
@@ -21,7 +22,7 @@ export function renderOverviewHTML(data, config) {
   h += '<div class="grid-stack">';
 
   // Cumulative Balance Chart - 12w x 3h
-  const calorieBudget = config.trackActiveBurn ? config.targets.calories : config.targets.calories;
+  const calorieBudget = config.targets.calories; // active burn added per-day in dayBudget below
   const cumT = days.reduce((a, d) => {
     const dayBudget = config.trackActiveBurn ? calorieBudget + (d.ac || 0) : calorieBudget;
     return a + (dayBudget - d.cal);
@@ -41,7 +42,7 @@ export function renderOverviewHTML(data, config) {
   const gMx = Math.max(mxA, Math.abs(cr)) * 1.2;
   const gP = Math.max(5, Math.min(95, 50 + (cr / gMx) * 50));
 
-  h += '<div class="grid-stack-item" gs-x="0" gs-y="0" gs-w="12" gs-h="3" gs-min-w="4" gs-min-h="2">';
+  h += '<div class="grid-stack-item" gs-id="cumC" gs-x="0" gs-y="0" gs-w="12" gs-h="3" gs-min-w="4" gs-min-h="2">';
   h += '<div class="grid-stack-item-content">';
   h += '<span class="gs-drag-handle">⋮</span>';
   h += '<h3>Cumulative Balance <span style="font-size:9px;font-weight:400;text-transform:none;color:var(--sub)">(' + days.length + ' days)</span></h3>';
@@ -60,7 +61,7 @@ export function renderOverviewHTML(data, config) {
   h += '</div></div></div>';
 
   // Calories Chart - 6w x 3h
-  h += '<div class="grid-stack-item" gs-x="0" gs-y="3" gs-w="6" gs-h="3" gs-min-w="4" gs-min-h="2">';
+  h += '<div class="grid-stack-item" gs-id="calC" gs-x="0" gs-y="3" gs-w="6" gs-h="3" gs-min-w="4" gs-min-h="2">';
   h += '<div class="grid-stack-item-content">';
   h += '<span class="gs-drag-handle">⋮</span>';
   h += '<h3>Calories vs Burn Target</h3>';
@@ -69,7 +70,7 @@ export function renderOverviewHTML(data, config) {
   h += '</div></div></div>';
 
   // Sodium Chart - 6w x 3h
-  h += '<div class="grid-stack-item" gs-x="6" gs-y="3" gs-w="6" gs-h="3" gs-min-w="4" gs-min-h="2">';
+  h += '<div class="grid-stack-item" gs-id="sodC" gs-x="6" gs-y="3" gs-w="6" gs-h="3" gs-min-w="4" gs-min-h="2">';
   h += '<div class="grid-stack-item-content">';
   h += '<span class="gs-drag-handle">⋮</span>';
   h += '<h3>Sodium vs ' + config.targets.sodium + 'mg</h3>';
@@ -80,7 +81,7 @@ export function renderOverviewHTML(data, config) {
   macros.forEach((mc, idx) => {
     const x = (idx % 3) * 4;
     const y = 6 + Math.floor(idx / 3) * 3;
-    h += '<div class="grid-stack-item" gs-x="' + x + '" gs-y="' + y + '" gs-w="4" gs-h="3" gs-min-w="4" gs-min-h="2">';
+    h += '<div class="grid-stack-item" gs-id="ov_' + mc.k + '" gs-x="' + x + '" gs-y="' + y + '" gs-w="4" gs-h="3" gs-min-w="4" gs-min-h="2">';
     h += '<div class="grid-stack-item-content">';
     h += '<span class="gs-drag-handle">⋮</span>';
     h += '<h3>' + mc.l + ' (' + mc.u + ')</h3>';
@@ -107,12 +108,12 @@ export function createOverviewCharts(data, config) {
   const gO = { color: colors.border + '80' };
 
   // Cumulative balance chart
-  const calorieBudget = config.trackActiveBurn ? config.targets.calories : config.targets.calories;
+  const calorieBudget = config.targets.calories; // active burn added per-day in dayBudget below
   let run = 0;
   const cumD = days.map(d => {
     const dayBudget = config.trackActiveBurn ? (config.targets.calories + (d.ac || 0)) : config.targets.calories;
     run += dayBudget - d.cal;
-    return { date: d.date, cum: Math.round(run) };
+    return { date: d.date, raw: d.raw, cum: Math.round(run) };
   });
   const cr = cumD.length ? cumD[cumD.length - 1].cum : 0;
   const isDef = cr >= 0;
@@ -138,7 +139,7 @@ export function createOverviewCharts(data, config) {
       onClick: (event, elements) => {
         if (!elements.length) return;
         const idx = elements[0].index;
-        const dayDate = cumD[idx]?.date ? days.find(d => d.date === cumD[idx].date)?.raw : null;
+        const dayDate = cumD[idx]?.raw ?? null;
         if (!dayDate) return;
         const meals = (window._mealsByDate || {})[dayDate] || [];
         toggleDrillDown(event.native.target.parentElement, dayDate, meals, colors);
@@ -333,7 +334,6 @@ export function createOverviewCharts(data, config) {
   };
 
   // Macro bars
-  const HIGHER_GOOD = new Set(['protein', 'fiber']);
   macros.forEach(mc => {
     const hg = HIGHER_GOOD.has(mc.k);
     const mLabels = allDays.map(d => d.date);
@@ -407,60 +407,3 @@ export function createOverviewCharts(data, config) {
   return charts;
 }
 
-/**
- * Toggle drill-down panel visibility for a chart
- */
-function toggleDrillDown(containerEl, dayDate, meals, colors) {
-  const existing = containerEl.querySelector('.drill-down');
-  if (existing) {
-    existing.remove();
-    return;
-  }
-
-  // Create drill-down panel
-  const panel = document.createElement('div');
-  panel.className = 'drill-down';
-
-  // Format date
-  const d = new Date(dayDate + 'T12:00:00');
-  const dateStr = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()] + ', ' +
-                  ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()] + ' ' +
-                  d.getDate();
-
-  let html = '<div style="margin-bottom:10px"><strong style="font-size:12px">' + dateStr + '</strong></div>';
-
-  if (meals.length === 0) {
-    html += '<p style="font-size:11px;color:var(--sub)">No meals recorded</p>';
-  } else {
-    // Group meals by type
-    const byType = {};
-    meals.forEach(m => {
-      const type = m.meal_type || 'other';
-      if (!byType[type]) byType[type] = [];
-      byType[type].push(m);
-    });
-
-    Object.entries(byType).forEach(([type, typeMeals]) => {
-      typeMeals.forEach(m => {
-        html += '<div class="meal-card">';
-        html += '<h4 style="text-transform:capitalize">' + (m.meal_name || type) + '</h4>';
-        if (m.description) html += '<div class="desc">' + m.description + '</div>';
-        if (m.created_at) {
-          const t = new Date(m.created_at);
-          const timeStr = t.toLocaleTimeString('en-US', {timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true});
-          html += '<div class="time">' + timeStr + '</div>';
-        }
-        html += '<div class="meal-macros">';
-        if (m.calories_kcal) html += '<span style="background:' + colors.cCal + '20;color:' + colors.cCal + '">' + Math.round(m.calories_kcal) + ' kcal</span>';
-        if (m.protein_g) html += '<span style="background:' + colors.cProtein + '20;color:' + colors.cProtein + '">' + Math.round(m.protein_g) + 'g P</span>';
-        if (m.carbs_g) html += '<span style="background:' + colors.cCarbs + '20;color:' + colors.cCarbs + '">' + Math.round(m.carbs_g) + 'g C</span>';
-        if (m.fat_g) html += '<span style="background:' + colors.cFat + '20;color:' + colors.cFat + '">' + Math.round(m.fat_g) + 'g F</span>';
-        html += '</div>';
-        html += '</div>';
-      });
-    });
-  }
-
-  panel.innerHTML = html;
-  containerEl.appendChild(panel);
-}
