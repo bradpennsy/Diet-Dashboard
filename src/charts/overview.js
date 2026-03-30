@@ -57,25 +57,26 @@ export function renderOverviewHTML(data, config) {
   }
   h += '<div class="gd" style="left:' + gP + '%;background:' + (isDef ? colors.green : colors.red) + '"></div></div>';
   h += '<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--sub);padding:0 4px" class="m"><span>← surplus</span><span>0</span><span>deficit →</span></div>';
-  h += '<div style="margin-top:12px"><canvas id="cumC" height="100"></canvas></div>';
-  h += '</div></div></div>';
+  h += '</div>';
+  h += '<div class="chart-wrap"><canvas id="cumC"></canvas></div>';
+  h += '</div></div>';
 
   // Calories Chart - 6w x 3h
   h += '<div class="grid-stack-item" gs-id="calC" gs-x="0" gs-y="3" gs-w="6" gs-h="3" gs-min-w="4" gs-min-h="2">';
   h += '<div class="grid-stack-item-content">';
   h += '<span class="gs-drag-handle">⋮</span>';
   h += '<h3>Calories vs Burn Target</h3>';
-  h += '<canvas id="calC" height="160"></canvas>';
   h += '<div class="lg"><div><div style="width:10px;height:10px;border-radius:2px;background:' + colors.green + '"></div>On target</div><div><div style="width:20px;height:10px;border-radius:2px;background:linear-gradient(90deg,' + colors.sub + ',' + colors.red + ')"></div>Over target</div><div><div style="width:14px;height:2px;background:' + colors.cBurn + '"></div>Burn</div></div>';
-  h += '</div></div></div>';
+  h += '<div class="chart-wrap"><canvas id="calC"></canvas></div>';
+  h += '</div></div>';
 
   // Sodium Chart - 6w x 3h
   h += '<div class="grid-stack-item" gs-id="sodC" gs-x="6" gs-y="3" gs-w="6" gs-h="3" gs-min-w="4" gs-min-h="2">';
   h += '<div class="grid-stack-item-content">';
   h += '<span class="gs-drag-handle">⋮</span>';
   h += '<h3>Sodium vs ' + config.targets.sodium + 'mg</h3>';
-  h += '<canvas id="sodC" height="160"></canvas>';
-  h += '</div></div></div>';
+  h += '<div class="chart-wrap"><canvas id="sodC"></canvas></div>';
+  h += '</div></div>';
 
   // Macro Charts - 4w x 3h each
   macros.forEach((mc, idx) => {
@@ -85,8 +86,8 @@ export function renderOverviewHTML(data, config) {
     h += '<div class="grid-stack-item-content">';
     h += '<span class="gs-drag-handle">⋮</span>';
     h += '<h3>' + mc.l + ' (' + mc.u + ')</h3>';
-    h += '<canvas id="ov_' + mc.k + '" height="130"></canvas>';
-    h += '</div></div></div>';
+    h += '<div class="chart-wrap"><canvas id="ov_' + mc.k + '"></canvas></div>';
+    h += '</div></div>';
   });
 
   h += '</div></div>';
@@ -136,6 +137,7 @@ export function createOverviewCharts(data, config) {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       onClick: (event, elements) => {
         if (!elements.length) return;
         const idx = elements[0].index;
@@ -215,6 +217,7 @@ export function createOverviewCharts(data, config) {
     plugins: [refLabelPlugin],
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       onClick: (event, elements) => {
         if (!elements.length) return;
         const idx = elements[0].index;
@@ -287,6 +290,7 @@ export function createOverviewCharts(data, config) {
     plugins: [refLabelPlugin],
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       onClick: (event, elements) => {
         if (!elements.length) return;
         const idx = elements[0].index;

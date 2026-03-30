@@ -3,6 +3,7 @@ import './styles/settings.css';
 import './styles/grid.css';
 import { loadConfig, saveConfig, isFirstRun, DEFAULTS } from './state.js';
 import { fetchDashboardData } from './api.js';
+import { getMockDashboardData, DEV_CONFIG } from './dev-mock.js';
 import { renderSetup } from './settings/setup.js';
 import { renderSettingsGearButton, renderSettingsModal, setModalConfig } from './settings/modal.js';
 import { renderToday } from './ui/today.js';
@@ -18,6 +19,15 @@ const DN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 async function main() {
+  // Dev bypass: ?dev in URL skips setup and uses mock data
+  const isDev = new URLSearchParams(location.search).has('dev');
+  if (isDev) {
+    window._activeTab = 'overview'; // Start on overview so GridStack initializes immediately
+    document.documentElement.setAttribute('data-palette', DEV_CONFIG.palette);
+    render(getMockDashboardData(), DEV_CONFIG);
+    return;
+  }
+
   let config = loadConfig();
 
   if (!config || !config.apiUrl) {
@@ -288,12 +298,16 @@ function render(raw, config) {
   app.appendChild(modalElement);
   setModalConfig(config);
 
-  // Set default active tab
+  // Set default active tab and ensure only one view is visible
   if (!window._activeTab) {
     window._activeTab = 'today';
-    document.querySelector('[data-v="today"]').classList.add('a');
-    document.getElementById('vw-today').classList.add('a');
   }
+  // Remove 'a' from all views, then add to active only
+  document.querySelectorAll('.vw').forEach(v => v.classList.remove('a'));
+  document.getElementById('vw-' + window._activeTab)?.classList.add('a');
+  // Same for tab buttons
+  document.querySelectorAll('.t').forEach(b => b.classList.remove('a'));
+  document.querySelector('[data-v="' + window._activeTab + '"]')?.classList.add('a');
 
   // Initialize grid for overview and trends tabs
   const initializeGrid = (tabName) => {
@@ -339,11 +353,12 @@ function render(raw, config) {
   initializeGrid(window._activeTab);
 
   // Re-initialize grid on tab change
+  let lastGridTab = window._activeTab;
   document.querySelectorAll('[data-v]').forEach(btn => {
     btn.addEventListener('click', () => {
       const newTab = btn.getAttribute('data-v');
-      if (newTab !== window._activeTab) {
-        window._activeTab = newTab;
+      if (newTab !== lastGridTab) {
+        lastGridTab = newTab;
         initializeGrid(newTab);
       }
     });

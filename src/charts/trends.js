@@ -20,10 +20,10 @@ export function renderTrendsHTML(data, config) {
   h += '<div class="vw a" id="vw-trends"><div class="grid-stack">';
 
   // Calorie trend (x:0, y:0, w:12, h:3) — full-width per spec
-  h += '<div class="grid-stack-item" gs-id="calT" gs-x="0" gs-y="0" gs-w="12" gs-h="3" gs-min-w="4" gs-min-h="2"><div class="grid-stack-item-content"><span class="gs-drag-handle">⋮</span><h3>Calorie Trend</h3><canvas id="calT" height="160"></canvas></div></div>';
+  h += '<div class="grid-stack-item" gs-id="calT" gs-x="0" gs-y="0" gs-w="12" gs-h="3" gs-min-w="4" gs-min-h="2"><div class="grid-stack-item-content"><span class="gs-drag-handle">⋮</span><h3>Calorie Trend</h3><div class="chart-wrap"><canvas id="calT"></canvas></div></div></div>';
 
   // Sodium trend (x:0, y:3, w:6, h:3) — first of 2-column pairs
-  h += '<div class="grid-stack-item" gs-id="sodT" gs-x="0" gs-y="3" gs-w="6" gs-h="3" gs-min-w="4" gs-min-h="2"><div class="grid-stack-item-content"><span class="gs-drag-handle">⋮</span><h3>Sodium Trend</h3><canvas id="sodT" height="160"></canvas></div></div>';
+  h += '<div class="grid-stack-item" gs-id="sodT" gs-x="0" gs-y="3" gs-w="6" gs-h="3" gs-min-w="4" gs-min-h="2"><div class="grid-stack-item-content"><span class="gs-drag-handle">⋮</span><h3>Sodium Trend</h3><div class="chart-wrap"><canvas id="sodT"></canvas></div></div></div>';
 
   // Macro trends — 2-column pairs
   const positions = [
@@ -35,7 +35,7 @@ export function renderTrendsHTML(data, config) {
   ];
   macros.forEach((mc, idx) => {
     const pos = positions[idx];
-    h += '<div class="grid-stack-item" gs-id="tr_' + mc.k + '" gs-x="' + pos.x + '" gs-y="' + pos.y + '" gs-w="6" gs-h="3" gs-min-w="3" gs-min-h="2"><div class="grid-stack-item-content"><span class="gs-drag-handle">⋮</span><h3>' + mc.l + '</h3><canvas id="tr_' + mc.k + '" height="160"></canvas></div></div>';
+    h += '<div class="grid-stack-item" gs-id="tr_' + mc.k + '" gs-x="' + pos.x + '" gs-y="' + pos.y + '" gs-w="6" gs-h="3" gs-min-w="3" gs-min-h="2"><div class="grid-stack-item-content"><span class="gs-drag-handle">⋮</span><h3>' + mc.l + '</h3><div class="chart-wrap"><canvas id="tr_' + mc.k + '"></canvas></div></div></div>';
   });
 
   h += '</div></div>';
@@ -89,6 +89,7 @@ export function createTrendsCharts(data, config) {
       plugins: [refLabelPlugin],
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         onClick: (event, elements) => {
           if (!elements.length) return;
           const idx = elements[0].index;

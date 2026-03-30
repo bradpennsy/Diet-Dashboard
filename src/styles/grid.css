@@ -11,6 +11,24 @@
   padding: 14px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Wrapper that flex-fills remaining card height after title/legend */
+.chart-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+/* Canvas absolutely fills its wrapper so it doesn't affect layout flow */
+.chart-wrap canvas {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .gs-drag-handle {
